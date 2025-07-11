@@ -13,7 +13,7 @@ function generateMockData(metric: string, chain: number, from: string, to: strin
   const startDate = new Date(from || "2025-01-01")
   const endDate = new Date(to || "2025-01-07")
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-  
+
   const chainConfig = CHAIN_CONFIGS[chain as keyof typeof CHAIN_CONFIGS] || CHAIN_CONFIGS[1]
   const data = []
 

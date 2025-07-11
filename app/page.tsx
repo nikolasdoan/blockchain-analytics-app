@@ -11,7 +11,10 @@ import MetricSelector from "@/components/MetricSelector"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Activity, Database, Zap, TrendingUp } from "lucide-react"
+import { Activity, Database, Zap, TrendingUp, Lock, LockOpen } from "lucide-react"
+import { MarketData } from "@/components/market-data"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+import { scrollToChart } from "@/lib/utils"
 
 interface ChartRequest {
   id: string
@@ -24,6 +27,7 @@ interface ChartRequest {
   chartType: string
   title: string
   timestamp: number
+  isPinned?: boolean
 }
 
 export default function BlockchainAnalytics() {
@@ -38,14 +42,34 @@ export default function BlockchainAnalytics() {
   const [defaultChain] = useState(1)
   const [defaultFrom] = useState("2025-01-01")
   const [defaultTo] = useState("2025-01-07")
+  
+  // Resizable panels state
+  const [topPanelSize, setTopPanelSize] = useState(50)
+
+  // Toggle chart pin function
+  const toggleChartPin = (chartId: string) => {
+    setActiveCharts(prev => prev.map(chart => {
+      if (chart.id === chartId) {
+        return { ...chart, isPinned: !chart.isPinned }
+      }
+      // Unpin other charts when one is pinned
+      return { ...chart, isPinned: false }
+    }))
+  }
 
   const addChart = (chartRequest: Omit<ChartRequest, 'id' | 'timestamp'>) => {
+    const chartId = `chart-${Date.now()}`;
     const newChart: ChartRequest = {
       ...chartRequest,
-      id: `chart-${Date.now()}`,
+      id: chartId,
       timestamp: Date.now()
     }
-    setActiveCharts((prev: ChartRequest[]) => [...prev, newChart])
+    setActiveCharts((prev: ChartRequest[]) => [...prev, newChart]);
+    
+    // Wait for chart to be rendered before scrolling
+    setTimeout(() => {
+      scrollToChart(chartId);
+    }, 100);
   }
 
   const clearCharts = () => {
@@ -186,7 +210,9 @@ export default function BlockchainAnalytics() {
         <ValueBucketsChart 
           chain={chart.chain} 
           from={chart.from} 
-          to={chart.to} 
+          to={chart.to}
+          onPin={() => toggleChartPin(chart.id)}
+          isPinned={chart.isPinned}
         />
       )
     }
@@ -199,6 +225,8 @@ export default function BlockchainAnalytics() {
         to={chart.to}
         chartType={chart.chartType as any}
         title={chart.title}
+        onPin={() => toggleChartPin(chart.id)}
+        isPinned={chart.isPinned}
       />
     )
   }
@@ -217,161 +245,109 @@ export default function BlockchainAnalytics() {
         onClearCharts={clearCharts}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Real-Time Blockchain Analytics</h1>
-              <p className="text-gray-600 mt-1">Dynamic aggregations • Fresh queries every time • No pre-computed views</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                <Activity className="w-3 h-3 mr-1" />
-                Live
-              </Badge>
-              <Badge variant="outline">
-                <Database className="w-3 h-3 mr-1" />
-                Dynamic SQL
-              </Badge>
-            </div>
-          </div>
-
-          {/* Architecture Overview - Always visible */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Zap className="w-5 h-5 text-blue-600" />
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup
+          direction="vertical"
+          onLayout={(sizes) => {
+            const newTopSize = sizes[0];
+            setTopPanelSize(newTopSize);
+          }}
+        >
+          {/* Top Half - Scrollable Charts */}
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div className="h-full p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">Live Analytics Dashboard</h1>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Badge 
+                      variant="secondary" 
+                      className={`${selectedChain === "ethereum" ? "bg-cyan-100 text-cyan-800" : "bg-gray-100 text-gray-600"} cursor-pointer hover:bg-opacity-90`}
+                      onClick={() => setSelectedChain("ethereum")}
+                    >
+                      Ethereum
+                    </Badge>
+                    <Badge 
+                      variant="secondary" 
+                      className={`${selectedChain === "base" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600"} cursor-pointer hover:bg-opacity-90`}
+                      onClick={() => setSelectedChain("base")}
+                    >
+                      Base
+                    </Badge>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">Parametrized APIs</p>
-                  <p className="text-sm text-gray-600">/api/chart/[metric]?chain=1&from=...&to=...</p>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Database className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-semibold">Fresh Aggregations</p>
-                  <p className="text-sm text-gray-600">Real-time SQL queries, no materialized views</p>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="font-semibold">Dynamic Charts</p>
-                  <p className="text-sm text-gray-600">React + SWR with 30s auto-refresh</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-
-
-          {/* Debug Test Buttons - Remove in production */}
-          {process.env.NODE_ENV === "development" && (
-            <Card className="p-4 bg-yellow-50 border-yellow-200">
-              <h3 className="text-sm font-semibold mb-2">🛠️ Debug Test Buttons</h3>
-              <div className="flex gap-2 flex-wrap">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    console.log("🧪 Testing hourly activity charts")
-                    handleChartRequest("transactions", "show hourly activity patterns")
-                  }}
-                >
-                  Test Hourly Charts
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    console.log("🧪 Testing gas charts")
-                    handleChartRequest("gas", "gas prices")
-                  }}
-                >
-                  Test Gas Charts
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    console.log("🧪 Testing volume charts")
-                    handleChartRequest("transactions", "transaction volume")
-                  }}
-                >
-                  Test Volume Charts
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={clearCharts}
-                >
-                  Clear All
-                </Button>
-              </div>
-              <div className="text-xs text-gray-600 mt-2">
-                Active charts: {activeCharts.length} | Show table: {showTable.toString()}
-              </div>
-            </Card>
-          )}
-
-          {/* Empty State - Show when no charts */}
-          {activeCharts.length === 0 && (
-            <Card className="p-8 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Ready for Real-Time Analytics</h3>
-                <p className="text-gray-600 mb-4">
-                  Ask questions about blockchain data to see dynamic charts generated in real-time.
-                  Each query triggers fresh SQL aggregations - no pre-computed materialized views!
-                </p>
-                <div className="text-sm text-gray-500">
-                  <p>Try asking: "Show me transaction volume trends" or "What are current gas prices?"</p>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Dynamic Charts - Only show when requested */}
-          {activeCharts.length > 0 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Live Analytics Dashboard</h2>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                   {activeCharts.length} chart{activeCharts.length !== 1 ? 's' : ''} • Fresh data
                 </Badge>
               </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {activeCharts.map(renderChart)}
+
+              {/* Horizontally Scrollable Charts Container */}
+              <div className="h-[calc(100%-4rem)] overflow-hidden">
+                <div className="overflow-x-auto scrollbar-hide h-full charts-scroll-container">
+                  <div className="flex space-x-4 h-full pb-2">
+                    {/* Pinned Charts */}
+                    {activeCharts.filter(chart => chart.isPinned).map((chart) => (
+                      <div 
+                        key={chart.id}
+                        data-chart-id={chart.id}
+                        className="flex-none w-[40%] shadow-lg"
+                      >
+                        <div className="relative h-full">
+                          {renderChart(chart)}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Unpinned Charts */}
+                    {activeCharts.filter(chart => !chart.isPinned).map((chart) => (
+                      <div 
+                        key={chart.id}
+                        data-chart-id={chart.id}
+                        className="flex-none w-[40%]"
+                      >
+                        <div className="relative h-full">
+                          {renderChart(chart)}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {activeCharts.length === 0 && (
+                      <div className="w-full flex items-center justify-center">
+                        <div className="text-center">
+                          <TrendingUp className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                          <p className="text-gray-600">Ask a question to generate charts</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </ResizablePanel>
 
-          {/* AI Generated Insights */}
-          {currentInsight && (
-            <GenerativeDataDisplay insight={currentInsight} selectedChain={selectedChain} />
-          )}
+          <ResizableHandle />
 
-          {/* Transaction Table - Only show when requested */}
-          {showTable && (
-            <TransactionTable data={mockTransactionData} visible={showTable} selectedChain={selectedChain} />
-          )}
-        </div>
+          {/* Bottom Half - Market Data Style Info */}
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div className="h-full p-6 bg-white overflow-y-auto">
+              <MarketData 
+                selectedChain={selectedChain}
+                data={{
+                  price: 56.85,
+                  change: 6.15,
+                  changePercent: 11.97,
+                  volume: 30522988,
+                  avgVolume: 10228728,
+                  marketCap: 37.12,
+                  beta: 1.51,
+                  peRatio: 10.08,
+                  eps: 5.64,
+                  targetEst: 58.69
+                }}
+              />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   )

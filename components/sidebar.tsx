@@ -14,10 +14,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ selectedChain, onChainSelect, onInsightGenerated, onTableToggle, onClearCharts }: SidebarProps) {
-  const chains = [
-    { id: "ethereum", name: "Ethereum", color: "bg-blue-500" },
-    { id: "base", name: "Base", color: "bg-blue-600" },
-  ]
+
 
   return (
     <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
@@ -66,22 +63,7 @@ export function Sidebar({ selectedChain, onChainSelect, onInsightGenerated, onTa
         />
       </div>
 
-      <div className="p-4 border-t border-gray-200">
-        <div className="space-y-2">
-          {chains.map((chain) => (
-            <button
-              key={chain.id}
-              onClick={() => onChainSelect(chain.id)}
-              className={`flex items-center space-x-2 w-full p-2 rounded-md transition-colors ${
-                selectedChain === chain.id ? "bg-blue-50" : "hover:bg-gray-50"
-              }`}
-            >
-              <div className={`w-3 h-3 rounded-full ${chain.color}`} />
-              <span className="text-sm font-medium">{chain.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+
     </div>
   )
 }

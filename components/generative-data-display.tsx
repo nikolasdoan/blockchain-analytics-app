@@ -329,13 +329,13 @@ export function GenerativeDataDisplay({ insight, selectedChain }: GenerativeData
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {insight.type === "transactions" && (
-          <>
-            <Card className="p-4">
-              <div className="flex items-center space-x-2">
-                <Activity className="w-5 h-5 text-blue-500" />
-                <div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {insight.type === "transactions" && (
+        <>
+          <Card className="p-4">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-5 h-5 text-blue-500" />
+              <div>
                   <p className="text-sm text-gray-600">
                     {insight.data.totalTransactions ? "Total Transactions" : 
                      insight.data.peakHour ? "Peak Hour" :
@@ -348,13 +348,13 @@ export function GenerativeDataDisplay({ insight, selectedChain }: GenerativeData
                           : insight.data.totalTransactions)
                       : insight.data.peakHour || insight.data.totalVolume || "N/A"}
                   </p>
-                </div>
               </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center space-x-2">
-                <DollarSign className="w-5 h-5 text-green-500" />
-                <div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5 text-green-500" />
+              <div>
                   <p className="text-sm text-gray-600">
                     {insight.data.avgGasPrice ? "Avg Gas Price" :
                      insight.data.avgTxPerHour ? "Avg Tx/Hour" :
@@ -367,13 +367,13 @@ export function GenerativeDataDisplay({ insight, selectedChain }: GenerativeData
                      insight.data.activeAddresses?.toLocaleString() ||
                      "N/A"}
                   </p>
-                </div>
               </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-purple-500" />
-                <div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="w-5 h-5 text-purple-500" />
+              <div>
                   <p className="text-sm text-gray-600">
                     {insight.data.topSender ? "Top Sender" :
                      insight.data.totalHours ? "Time Period" :
@@ -386,51 +386,51 @@ export function GenerativeDataDisplay({ insight, selectedChain }: GenerativeData
                         ? `${insight.data.totalHours}h`
                         : insight.data.topTransaction || "N/A"}
                   </p>
-                </div>
               </div>
-            </Card>
-          </>
-        )}
+            </div>
+          </Card>
+        </>
+      )}
 
-        {insight.type === "gas" && (
-          <>
-            <Card className="p-4">
-              <div className="flex items-center space-x-2">
-                <DollarSign className="w-5 h-5 text-blue-500" />
-                <div>
-                  <p className="text-sm text-gray-600">Current Gas Price</p>
+      {insight.type === "gas" && (
+        <>
+          <Card className="p-4">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5 text-blue-500" />
+              <div>
+                <p className="text-sm text-gray-600">Current Gas Price</p>
                   <p className="text-2xl font-bold">{insight.data.currentGasPrice || "N/A"}</p>
-                </div>
               </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center space-x-2">
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center space-x-2">
                 {(insight.data.trend === "decreasing") ? (
-                  <TrendingDown className="w-5 h-5 text-green-500" />
-                ) : (
-                  <TrendingUp className="w-5 h-5 text-red-500" />
-                )}
-                <div>
-                  <p className="text-sm text-gray-600">Trend</p>
+                <TrendingDown className="w-5 h-5 text-green-500" />
+              ) : (
+                <TrendingUp className="w-5 h-5 text-red-500" />
+              )}
+              <div>
+                <p className="text-sm text-gray-600">Trend</p>
                   <Badge variant={(insight.data.trend === "decreasing") ? "default" : "destructive"}>
                     {insight.data.trend || "stable"}
-                  </Badge>
-                </div>
+                </Badge>
               </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center space-x-2">
-                <TrendingDown className="w-5 h-5 text-green-500" />
-                <div>
-                  <p className="text-sm text-gray-600">Potential Savings</p>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center space-x-2">
+              <TrendingDown className="w-5 h-5 text-green-500" />
+              <div>
+                <p className="text-sm text-gray-600">Potential Savings</p>
                   <p className="text-2xl font-bold text-green-600">{insight.data.savings || "0%"}</p>
-                </div>
               </div>
-            </Card>
-          </>
-        )}
-      </div>
-    )
+            </div>
+          </Card>
+        </>
+      )}
+    </div>
+  )
   }
 
   return (

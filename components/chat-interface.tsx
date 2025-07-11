@@ -81,7 +81,7 @@ export function ChatInterface({ onInsightGenerated, onTableToggle, onClearCharts
           originalQuery: userQuery,
           data: {
             currentGasPrice: "23.2 Gwei",
-            trend: "decreasing", 
+            trend: "decreasing",
             savings: "12%",
           },
         })
@@ -217,23 +217,23 @@ export function ChatInterface({ onInsightGenerated, onTableToggle, onClearCharts
             ))}
           </div>
         </div>
-      </div>
+        </div>
 
       {/* Chat Input */}
       <div className="mt-auto">
         <form onSubmit={handleSubmit} className="flex space-x-2">
-          <Input
-            value={input}
-            onChange={handleInputChange}
+        <Input
+          value={input}
+          onChange={handleInputChange}
             placeholder="Ask about blockchain data..."
             className="flex-1 text-xs"
-            disabled={isLoading}
-          />
+          disabled={isLoading}
+        />
           <Button type="submit" disabled={isLoading || !input.trim()} size="sm">
             <Send className="w-3 h-3" />
-          </Button>
-        </form>
-      </div>
+        </Button>
+      </form>
+        </div>
 
 
     </Card>
